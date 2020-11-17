@@ -3,6 +3,7 @@ package mech2cs.list2file.controller;
 import mech2cs.list2file.util.List2FileUtil;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.servlet.http.HttpServletResponse;
@@ -21,10 +22,11 @@ public class SampleController {
         List<SampleDTO> list = getSampleList();
 
         try {
-            StringBuffer stringBuffer = List2FileUtil.list2CSV(list);
+            byte[] byteArray = List2FileUtil.list2CSV(list);
             response.setContentType("text/plain; charset=utf-8");
             response.setHeader("Content-Disposition", "attachment;filename=sampleCSV.csv");
-            response.getWriter().print(stringBuffer);
+            StreamUtils.copy(byteArray,response.getOutputStream());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -37,10 +39,11 @@ public class SampleController {
         List<SampleDTO> list = getSampleList();
 
         try {
-            Workbook workbook = List2FileUtil.list2WorkBook(list);
+            byte[] byteArray = List2FileUtil.list2WorkBook(list);
             response.setContentType("ms-vnd/excel");
             response.setHeader("Content-Disposition", "attachment;filename=sampleExcel.xlsx");
-            workbook.write(response.getOutputStream());
+            StreamUtils.copy(byteArray,response.getOutputStream());
+
         } catch (IllegalAccessException | IOException e) {
             e.printStackTrace();
         }

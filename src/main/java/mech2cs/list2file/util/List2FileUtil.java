@@ -3,6 +3,7 @@ package mech2cs.list2file.util;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.poi.ss.usermodel.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.sql.Date;
@@ -14,22 +15,22 @@ import java.util.List;
 
 public class List2FileUtil {
 
-    public static StringBuffer list2CSV(List<?> list) throws Exception {
+    public static byte[] list2CSV(List<?> list) throws Exception {
         return list2CSV(list, ',', "yyyy-MM-dd hh:mm:ss");
     }
 
-    public static StringBuffer list2CSV(List<?> list, char delimiter) throws Exception {
+    public static byte[] list2CSV(List<?> list, char delimiter) throws Exception {
         return list2CSV(list, delimiter, "yyyy-MM-dd hh:mm:ss");
     }
 
-    public static StringBuffer list2CSV(List<?> list, String datePattern) throws Exception {
+    public static byte[] list2CSV(List<?> list, String datePattern) throws Exception {
         return list2CSV(list, ',', datePattern);
     }
 
-    public static StringBuffer list2CSV(List<?> list, char delimiterChar, String datePattern) throws Exception {
+    public static byte[] list2CSV(List<?> list, char delimiterChar, String datePattern) throws Exception {
         String delimiter = String.valueOf(delimiterChar);
         if(list.size() == 0){
-            return new StringBuffer();
+            return new StringBuffer().toString().getBytes();
         }
 
         SimpleDateFormat format = new SimpleDateFormat(datePattern);
@@ -74,21 +75,21 @@ public class List2FileUtil {
             data.append('\n');
         }
 
-        return data;
+        return data.toString().getBytes();
 
     }
 
-    public static Workbook list2WorkBook(List<?> list) throws IOException, IllegalAccessException{
+    public static byte[] list2WorkBook(List<?> list) throws IOException, IllegalAccessException{
         return list2WorkBook(list, "yyyy-MM-dd hh:mm:ss");
     }
 
-    public static Workbook list2WorkBook(List<?> list, String datePattern) throws IOException, IllegalAccessException {
+    public static byte[] list2WorkBook(List<?> list, String datePattern) throws IOException, IllegalAccessException {
 
         Workbook workbook = WorkbookFactory.create(true);
         Sheet sheet = workbook.createSheet();
 
         if(list.size() == 0){
-            return workbook;
+            return workbook.toString().getBytes();
         }
 
         DataFormat format = workbook.createDataFormat();
@@ -146,8 +147,11 @@ public class List2FileUtil {
                 }
             }
         }
-        return workbook;
 
+        try(ByteArrayOutputStream bos = new ByteArrayOutputStream()){
+            workbook.write(bos);
+            byte[] bytes = bos.toByteArray();
+            return bytes;
+        }
     }
-
 }
